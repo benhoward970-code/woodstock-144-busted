@@ -8,18 +8,23 @@
 </head>
 
 <body>
+<!-- Animated floating cans layer -->
+<div id="floatLayer" class="float-layer" aria-hidden="true"></div>
+
 <header class="wrap header">
 <div class="brand">
 <div class="logo" aria-hidden="true">🥤</div>
 <div>
 <h1>“144 Woodstocks in one night”</h1>
-<p class="sub">An Australia-based reality check built to lovingly prove your mate’s mate is absolutely dreaming.</p>
+<p class="sub">
+An Aussie reality-check machine built to lovingly prove your mate’s mate is absolutely dreaming.
+</p>
 </div>
 </div>
 
 <div class="pill-row">
+<span class="pill">AUS standard drinks (10g)</span>
 <span class="pill">Free hosting</span>
-<span class="pill">AUS standard drinks</span>
 <span class="pill">100% banter</span>
 </div>
 </header>
@@ -27,7 +32,13 @@
 <main class="wrap grid">
 <section class="panel">
 <div class="panel-inner">
+<div class="panel-top">
 <h2>Reality Check Calculator</h2>
+<div class="mini-actions">
+<button id="spawn" class="ghost" type="button">+ Add cans</button>
+<button id="shake" class="ghost" type="button">Shake the page</button>
+</div>
+</div>
 
 <div class="note">
 Uses the Australian standard drink definition (1 standard drink = 10g of pure alcohol).
@@ -72,17 +83,21 @@ Carton size (cans)
 </label>
 </div>
 
-<button id="go">Calculate the damage</button>
+<div class="row2">
+<button id="go" type="button">Calculate the damage</button>
+<button id="roast" class="danger" type="button">Generate roast</button>
+</div>
 </div>
 
 <div id="results" class="results"></div>
+<div id="roastOut" class="roast-out" aria-live="polite"></div>
 </div>
 </section>
 
 <section class="panel">
 <div class="panel-inner">
 <h2>Cartons of “Yeah Nah”</h2>
-<p class="muted">This is how many cartons you’d need to stack to reach the claim.</p>
+<p class="muted">How many cartons you’d need to stack to hit the claim.</p>
 
 <div class="carton-wrap">
 <div id="cartonCount" class="carton-count"></div>
@@ -93,7 +108,7 @@ Carton size (cans)
 <ul id="facts" class="facts"></ul>
 
 <div class="footer-note">
-Disclaimer: This site is banter + rough maths, not medical advice. If anyone is actually trying to do this, that’s an emergency situation.
+Disclaimer: banter + rough maths, not medical advice. If anyone is genuinely trying to do this, it’s an emergency situation.
 </div>
 </div>
 </section>
@@ -101,7 +116,7 @@ Disclaimer: This site is banter + rough maths, not medical advice. If anyone is 
 
 <footer class="wrap footer">
 <span>Built with love, maths, and disrespect for tall tales.</span>
-<span class="muted">Cursor is a custom “can” because we’re committed to the bit.</span>
+<span class="muted">Tip: click floating cans to “pop” them.</span>
 </footer>
 
 <script src="app.js"></script>
