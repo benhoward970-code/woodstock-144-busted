@@ -1,12 +1,10 @@
 /*
-AUS assumptions (shown in-site as “rough maths + banter”):
-- 1 Australian standard drink = 10g pure alcohol. (Australian Dept of Health / NHMRC)
-- Rough metabolism rule: body processes ~1 standard drink per hour (varies by person).
-Math notes:
-- grams of pure alcohol ≈ volume(ml) * (ABV/100) * ethanol density
-- ethanol density ~0.789 g/mL at ~20–25°C (common chemistry reference)
+Australia-based rough maths + banter.
+- AUS standard drink = 10g pure alcohol
+- Metabolism rough rule-of-thumb: ~1 standard drink per hour (varies)
+- Pure alcohol grams: volume(ml) * ABV * density (0.789 g/mL)
 
-This script does NOT give medical advice — it’s a “reality check” calculator.
+This is NOT medical advice.
 */
 
 function fmt(n, digits = 0){
@@ -14,8 +12,8 @@ return Number(n).toLocaleString(undefined, { maximumFractionDigits: digits });
 }
 
 const ETHANOL_DENSITY = 0.789; // g/mL
-const STD_DRINK_G = 10; // AUS standard drink = 10g pure alcohol
-const METAB_RATE_SD_PER_H = 1; // rough AUS rule of thumb
+const STD_DRINK_G = 10; // AUS standard drink
+const METAB_RATE_SD_PER_H = 1; // rough
 
 function calc(){
 const cans = Math.max(1, Number(document.getElementById("cans").value || 144));
@@ -26,25 +24,17 @@ const cartonSize = Number(document.getElementById("cartonSize").value || 12);
 
 const totalLiquidL = (cans * sizeMl) / 1000;
 
-// Pure ethanol volume (mL) then convert to grams using density
 const pureEthanolMl = cans * sizeMl * (abv / 100);
 const pureAlcoholG = pureEthanolMl * ETHANOL_DENSITY;
 
-// Australian standard drinks
 const standardDrinks = pureAlcoholG / STD_DRINK_G;
 
-// Pace
 const cansPerHour = cans / hours;
 const secondsPerCan = (hours * 3600) / cans;
 
-// “Time to process” based on rule-of-thumb metabolism
 const metabolizeHours = standardDrinks / METAB_RATE_SD_PER_H;
-
-// Cartons
 const cartons = Math.ceil(cans / cartonSize);
 
-// Banter thresholds (still serious):
-// 20+ standard drinks is already extreme/dangerous; 60+ is absurdly high.
 const bigRedFlag = standardDrinks >= 20;
 const utterlyCooked = standardDrinks >= 60;
 
@@ -85,9 +75,9 @@ Based on ${r.cans} cans in ${r.hours} hours at ${r.abv}% ABV (${r.sizeMl} mL).
 <div class="card">
 <div class="kv"><span>Pace required</span><span>${fmt(r.cansPerHour, 1)} cans/hour</span></div>
 <div class="kv"><span>That’s basically</span><span>${oneEvery}</span></div>
-<div class="kv"><span>Time for body to process</span><span>${fmt(r.metabolizeHours, 0)} hours</span></div>
+<div class="kv"><span>Body “processing time”</span><span>${fmt(r.metabolizeHours, 0)} hours</span></div>
 <div class="muted" style="margin-top:6px;">
-(Using the rough “~1 standard drink/hour” rule of thumb — varies by person.)
+(Rule-of-thumb ~1 standard drink/hour — varies person to person.)
 </div>
 </div>
 `;
@@ -129,6 +119,7 @@ let remaining = r.cans;
 for (let i=1; i<=cartonsToShow; i++){
 const filled = Math.min(r.cartonSize, remaining);
 remaining -= filled;
+
 const title = i === cartonsToShow && r.cartons > cartonsToShow
 ? `Carton ${i} (…plus ${r.cartons - cartonsToShow} more 😭)`
 : `Carton ${i}`;
@@ -142,16 +133,16 @@ const facts = document.getElementById("facts");
 facts.innerHTML = "";
 
 const factsList = [
-`To hit ${r.cans} cans in ${r.hours} hours, you'd need to average ${fmt(r.cansPerHour, 1)} cans per hour.`,
-`That’s roughly ${fmt(r.secondsPerCan, 0)} seconds per can. No meals. No breaks. Just constant can-to-mouth behaviour.`,
-`Total liquid is ${fmt(r.totalLiquidL, 2)} litres. Your bladder would be writing hate mail by can #10.`,
+`To hit ${r.cans} cans in ${r.hours} hours, you’d need to average ${fmt(r.cansPerHour, 1)} cans/hour.`,
+`That’s roughly ${fmt(r.secondsPerCan, 0)} seconds per can. No meals. No water. No bathroom breaks. Just vibes (bad ones).`,
+`Total liquid: ${fmt(r.totalLiquidL, 2)} L. Your bladder would resign in writing.`,
 `Estimated standard drinks (AUS): ~${fmt(r.standardDrinks, 1)}. Even a fraction of that is dangerous.`,
-`Using the “~1 standard drink/hour” rule, your body would need about ${fmt(r.metabolizeHours, 0)} hours to process it (that’s ${fmt(r.metabolizeHours/24, 1)} days).`
+`Using ~1 standard drink/hour, your body would need about ${fmt(r.metabolizeHours, 0)} hours to process it (≈ ${fmt(r.metabolizeHours/24, 1)} days).`,
+`If this was true, the empty cans would require: a skip bin, a forklift, and a full investigation.`
 ];
 
-if (r.standardDrinks > 100) factsList.push("At this point it’s not a drinking session, it’s a full-time job with overtime.");
-if (r.secondsPerCan < 120) factsList.push("You wouldn’t be drinking — you’d be speedrunning.");
-factsList.push("If this story was true, the empties would need their own skip bin and a separate postcode.");
+if (r.secondsPerCan < 90) factsList.push("You wouldn’t be drinking — you’d be speedrunning.");
+if (r.standardDrinks > 100) factsList.push("At this point it’s not a night out, it’s a second job with overtime.");
 
 for (const f of factsList){
 const li = document.createElement("li");
@@ -160,12 +151,116 @@ facts.appendChild(li);
 }
 }
 
+/* ---------- FUN MOVING CANS ---------- */
+
+function rand(min, max){ return Math.random() * (max - min) + min; }
+
+function spawnFloatingCans(n = 10){
+const layer = document.getElementById("floatLayer");
+if (!layer) return;
+
+const flavours = ["can-a","can-b","can-c"];
+const vw = window.innerWidth;
+const vh = window.innerHeight;
+
+for (let i=0; i<n; i++){
+const can = document.createElement("div");
+can.className = `float-can ${flavours[Math.floor(Math.random()*flavours.length)]}`;
+
+// Position anywhere, slightly off-screen too
+const x = rand(-40, vw - 20);
+const y = rand(-60, vh - 40);
+
+const dur = rand(6, 12);
+const dur2 = rand(7, 14);
+const delay = rand(0, 3);
+
+can.style.left = `${x}px`;
+can.style.top = `${y}px`;
+can.style.animation = `floaty ${dur}s ease-in-out ${delay}s infinite, driftLR ${dur2}s ease-in-out ${delay}s infinite`;
+
+// Click to pop
+can.addEventListener("click", () => {
+can.style.transition = "transform 160ms ease, opacity 160ms ease";
+can.style.transform = "scale(1.4) rotate(12deg)";
+can.style.opacity = "0";
+setTimeout(() => can.remove(), 170);
+});
+
+layer.appendChild(can);
+
+// Keep layer from growing forever
+if (layer.childElementCount > 60) {
+layer.removeChild(layer.firstElementChild);
+}
+}
+}
+
+function clearFloatingCans(){
+const layer = document.getElementById("floatLayer");
+if (!layer) return;
+layer.innerHTML = "";
+}
+
+function roastLine(r){
+const lines = [
+`Mate… that’s not a “big night”, that’s a full-time job with overtime.`,
+`144 cans? That’s not drinking — that’s an industrial process.`,
+`If this was true, the empties would need their own suburb.`,
+`At ${fmt(r.secondsPerCan,0)} seconds a can, he wasn’t sipping — he was speedrunning.`,
+`The only thing that drank 144 Woodstocks in one night is the comment section.`
+];
+// Choose one that references pace if it's spicy
+if (r.secondsPerCan < 90) return lines[3];
+return lines[Math.floor(Math.random()*lines.length)];
+}
+
+function showRoast(text){
+const out = document.getElementById("roastOut");
+if (!out) return;
+out.style.display = "block";
+out.textContent = text;
+}
+
+/* ---------- WIRE UP ---------- */
+
 function run(){
 const r = calc();
 renderResults(r);
 renderCartons(r);
 renderFacts(r);
+
+// More claim = more chaos
+const bonus = Math.min(20, Math.floor(r.cans / 20));
+spawnFloatingCans(6 + bonus);
 }
 
 document.getElementById("go").addEventListener("click", run);
+
+document.getElementById("spawn").addEventListener("click", () => {
+spawnFloatingCans(12);
+});
+
+document.getElementById("shake").addEventListener("click", () => {
+document.body.classList.remove("shake");
+// force reflow
+void document.body.offsetWidth;
+document.body.classList.add("shake");
+spawnFloatingCans(8);
+});
+
+document.getElementById("roast").addEventListener("click", () => {
+const r = calc();
+showRoast(roastLine(r));
+spawnFloatingCans(10);
+});
+
+// Start with some ambience
+spawnFloatingCans(14);
 run();
+
+// On resize, keep it looking good
+window.addEventListener("resize", () => {
+// optional: you can clear + respawn if you want
+// clearFloatingCans(); spawnFloatingCans(14);
+});
